@@ -1,0 +1,12 @@
+body {
+    background-color: #f5f7fb;
+}
+.navbar-brand {
+    font-weight: 600;
+}
+.card {
+    box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.03);
+}
+.table thead th {
+    background-color: #f1f4f9;
+}
