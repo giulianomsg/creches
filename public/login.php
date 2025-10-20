@@ -5,6 +5,11 @@ use App\Controllers\AuthController;
 
 $controller = new AuthController();
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $controller->localAuthenticate();
+    exit;
+}
+
 if (isset($_GET['code'])) {
     $controller->callback();
     exit;

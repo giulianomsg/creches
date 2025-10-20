@@ -26,12 +26,13 @@ class UserModel extends BaseModel
 
     public function create(array $data): int
     {
-        $stmt = $this->db->prepare('INSERT INTO users (google_id, name, email, role) VALUES (:google_id, :name, :email, :role)');
+        $stmt = $this->db->prepare('INSERT INTO users (google_id, name, email, role, password_hash) VALUES (:google_id, :name, :email, :role, :password_hash)');
         $stmt->execute([
-            'google_id' => $data['google_id'],
+            'google_id' => $data['google_id'] ?? null,
             'name' => $data['name'],
             'email' => $data['email'],
-            'role' => $data['role'],
+            'role' => $data['role'] ?? 'cadastro',
+            'password_hash' => $data['password_hash'] ?? null,
         ]);
 
         return (int)$this->db->lastInsertId();
@@ -40,5 +41,38 @@ class UserModel extends BaseModel
     public function all(): array
     {
         return $this->db->query('SELECT * FROM users ORDER BY name')->fetchAll();
+    }
+
+    public function findById(int $id): ?array
+    {
+        $stmt = $this->db->prepare('SELECT * FROM users WHERE id = :id LIMIT 1');
+        $stmt->execute(['id' => $id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result ?: null;
+    }
+
+    public function attachGoogleAccount(int $userId, string $googleId): void
+    {
+        $stmt = $this->db->prepare('UPDATE users SET google_id = :google_id WHERE id = :id');
+        $stmt->execute([
+            'google_id' => $googleId,
+            'id' => $userId,
+        ]);
+    }
+
+    public function updatePassword(int $userId, string $passwordHash): void
+    {
+        $stmt = $this->db->prepare('UPDATE users SET password_hash = :password_hash WHERE id = :id');
+        $stmt->execute([
+            'password_hash' => $passwordHash,
+            'id' => $userId,
+        ]);
+    }
+
+    public function hasLocalUsers(): bool
+    {
+        $stmt = $this->db->query('SELECT COUNT(*) FROM users WHERE password_hash IS NOT NULL');
+        return (bool)$stmt->fetchColumn();
     }
 }

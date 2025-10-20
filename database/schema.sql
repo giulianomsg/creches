@@ -1,10 +1,13 @@
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    google_id VARCHAR(64) NOT NULL UNIQUE,
+    google_id VARCHAR(64) NULL,
     name VARCHAR(150) NOT NULL,
     email VARCHAR(150) NOT NULL,
+    password_hash VARCHAR(255) NULL,
     role ENUM('admin','cadastro') NOT NULL DEFAULT 'cadastro',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY idx_users_google_id (google_id),
+    UNIQUE KEY idx_users_email (email)
 );
 
 CREATE TABLE units (

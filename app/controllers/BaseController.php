@@ -20,6 +20,7 @@ abstract class BaseController
     {
         extract($data);
         $config = $this->config;
+        $user = SessionHelper::get('user');
         $content = __DIR__ . '/../views/' . $view . '.php';
         ob_start();
         include __DIR__ . '/../views/layouts/main.php';

@@ -7,7 +7,7 @@ return [
         'client_id' => getenv('GOOGLE_CLIENT_ID') ?: 'SEU_CLIENT_ID',
         'client_secret' => getenv('GOOGLE_CLIENT_SECRET') ?: 'SEU_CLIENT_SECRET',
         'redirect_uri' => getenv('GOOGLE_REDIRECT_URI') ?: 'http://localhost/login.php',
-        'hosted_domain' => 'educacao.riopreto.sp.gov.br',
+        'hosted_domain' => getenv('GOOGLE_HOSTED_DOMAIN') ?: 'educacao.riopreto.sp.gov.br',
     ],
     'upload' => [
         'max_size' => 10 * 1024 * 1024,

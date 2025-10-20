@@ -42,3 +42,30 @@ HTML;
 }
 
 require $autoloadPath;
+
+spl_autoload_register(function (string $class): void {
+    $prefix = 'App\\';
+
+    if (strpos($class, $prefix) !== 0) {
+        return;
+    }
+
+    $relativeClass = substr($class, strlen($prefix));
+    $parts = explode('\\', $relativeClass);
+    $fileName = array_pop($parts);
+
+    $directories = array_map(static function (string $segment): string {
+        return strtolower($segment);
+    }, $parts);
+
+    $path = __DIR__ . '/app/';
+    if (!empty($directories)) {
+        $path .= implode('/', $directories) . '/';
+    }
+
+    $file = $path . $fileName . '.php';
+
+    if (file_exists($file)) {
+        require_once $file;
+    }
+});

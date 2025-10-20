@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Helpers\CSRFHelper;
 use App\Helpers\FlashHelper;
 use App\Helpers\SessionHelper;
 use App\Models\LogModel;
@@ -25,7 +26,10 @@ class AuthController extends BaseController
     public function login(): string
     {
         $authUrl = $this->googleOAuthService->getAuthUrl();
-        return $this->render('auth/login', compact('authUrl'));
+        $oauthChecklist = $this->googleOAuthService->getConfigurationChecklist();
+        $hasLocalUsers = $this->users->hasLocalUsers();
+
+        return $this->render('auth/login', compact('authUrl', 'oauthChecklist', 'hasLocalUsers'));
     }
 
     public function callback(): void
@@ -41,23 +45,67 @@ class AuthController extends BaseController
             $user = $this->users->findByGoogleId($userInfo['google_id']);
 
             if (!$user) {
-                $userInfo['role'] = 'cadastro';
-                $userId = $this->users->create($userInfo);
-                $user = $this->users->findByGoogleId($userInfo['google_id']);
+                $user = $this->users->findByEmail($userInfo['email']);
+
+                if ($user) {
+                    $this->users->attachGoogleAccount((int) $user['id'], $userInfo['google_id']);
+                    $user = $this->users->findById((int) $user['id']);
+                } else {
+                    $userInfo['role'] = 'cadastro';
+                    $userId = $this->users->create($userInfo);
+                    $user = $this->users->findById($userId);
+                }
             }
 
-            SessionHelper::set('user', $user);
-            $this->logs->record([
-                'user_id' => $user['id'],
-                'acao' => 'login',
-                'descricao' => 'Login realizado via OAuth Google',
-            ]);
-
-            $this->redirect('/');
+            $this->finalizeLogin($user, 'OAuth Google');
         } catch (\Throwable $exception) {
             FlashHelper::add('danger', 'Falha na autenticação: ' . $exception->getMessage());
             $this->redirect('/login.php');
         }
+    }
+
+    public function localAuthenticate(): void
+    {
+        $token = $_POST[$this->config['security']['csrf_token_name']] ?? '';
+        if (!CSRFHelper::validate($token)) {
+            FlashHelper::add('danger', 'Token CSRF inválido. Recarregue a página e tente novamente.');
+            $this->redirect('/login.php');
+        }
+
+        $email = strtolower(trim($_POST['email'] ?? ''));
+        $password = $_POST['password'] ?? '';
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            FlashHelper::add('danger', 'Informe um e-mail institucional válido.');
+            $this->redirect('/login.php');
+        }
+
+        if ($password === '') {
+            FlashHelper::add('danger', 'Informe a senha de acesso.');
+            $this->redirect('/login.php');
+        }
+
+        $domain = substr(strrchr($email, '@') ?: '', 1);
+        if ($domain !== strtolower($this->config['google']['hosted_domain'])) {
+            FlashHelper::add('danger', 'Este login alternativo está limitado ao domínio institucional autorizado.');
+            $this->redirect('/login.php');
+        }
+
+        $user = $this->users->findByEmail($email);
+
+        if (!$user || empty($user['password_hash'])) {
+            FlashHelper::add('danger', 'Credenciais inválidas ou usuário sem senha cadastrada.');
+            $this->redirect('/login.php');
+        }
+
+        $peppered = $password . $this->config['security']['password_pepper'];
+
+        if (!password_verify($peppered, $user['password_hash'])) {
+            FlashHelper::add('danger', 'Credenciais inválidas.');
+            $this->redirect('/login.php');
+        }
+
+        $this->finalizeLogin($user, 'autenticação local');
     }
 
     public function logout(): void
@@ -72,5 +120,24 @@ class AuthController extends BaseController
             ]);
         }
         $this->redirect('/login.php');
+    }
+
+    private function finalizeLogin(array $user, string $method): void
+    {
+        $userId = (int) ($user['id'] ?? 0);
+        unset($user['password_hash']);
+
+        SessionHelper::set('user', $user);
+
+        if ($userId > 0) {
+            $this->logs->record([
+                'user_id' => $userId,
+                'acao' => 'login',
+                'descricao' => 'Login realizado via ' . $method,
+            ]);
+        }
+
+        FlashHelper::add('success', 'Autenticação realizada com sucesso.');
+        $this->redirect('/');
     }
 }
