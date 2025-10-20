@@ -15,6 +15,18 @@ $config = require __DIR__ . '/../config/config.php';
 SessionHelper::start($config['session_name']);
 
 $route = $_GET['route'] ?? '';
+
+if ($route === '' && isset($_SERVER['REQUEST_URI'])) {
+    $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
+    $basePath = parse_url($config['base_url'], PHP_URL_PATH) ?: '';
+    $basePath = rtrim($basePath, '/');
+
+    if ($basePath !== '' && str_starts_with($requestPath, $basePath)) {
+        $requestPath = substr($requestPath, strlen($basePath));
+    }
+
+    $route = trim($requestPath, '/');
+}
 $router = new Router();
 
 $router->get('/', function () {

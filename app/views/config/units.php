@@ -1,3 +1,4 @@
+<?php $baseUrl = rtrim($config['base_url'], '/'); ?>
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h3">Unidades Escolares</h1>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalUnidade">Nova Unidade</button>
@@ -21,7 +22,7 @@
             <td><?= htmlspecialchars((string)$unit['capacidade']) ?></td>
             <td>
                 <button class="btn btn-sm btn-secondary btn-edit" data-bs-toggle="modal" data-bs-target="#modalUnidade">Editar</button>
-                <form action="/?route=config/delete-unit" method="post" class="d-inline" onsubmit="return confirm('Excluir unidade?');">
+                <form action="<?= htmlspecialchars($baseUrl . '/?route=config/delete-unit') ?>" method="post" class="d-inline" onsubmit="return confirm('Excluir unidade?');">
                     <input type="hidden" name="<?= $config['security']['csrf_token_name'] ?>" value="<?= App\Helpers\CSRFHelper::token() ?>">
                     <input type="hidden" name="id" value="<?= $unit['id'] ?>">
                     <button class="btn btn-sm btn-danger">Excluir</button>
@@ -35,7 +36,7 @@
 <div class="modal fade" id="modalUnidade" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="/?route=config/save-unit" method="post">
+            <form action="<?= htmlspecialchars($baseUrl . '/?route=config/save-unit') ?>" method="post">
                 <input type="hidden" name="<?= $config['security']['csrf_token_name'] ?>" value="<?= App\Helpers\CSRFHelper::token() ?>">
                 <input type="hidden" name="id" id="unit_id">
                 <div class="modal-header">

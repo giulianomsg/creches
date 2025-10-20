@@ -25,7 +25,7 @@ cp config/config.php config/config.local.php # opcional para sobreescrever vari�
 
 Configure as variáveis de ambiente:
 ```
-APP_BASE_URL=https://seusistema
+APP_BASE_URL=https://sistemas.educacao.riopreto.br/creches/public
 DB_DSN="mysql:host=localhost;dbname=creches;charset=utf8mb4"
 DB_USER=usuario
 DB_PASSWORD=senha
@@ -41,7 +41,7 @@ Importe o esquema de banco:
 mysql -u root -p creches < database/schema.sql
 ```
 
-Configure o virtual host apontando para `public/`.
+Configure o virtual host apontando para `public/` e ajuste `APP_BASE_URL` sempre com o caminho completo até a pasta `public` (sem barra final).
 
 ### Login alternativo (fallback)
 Caso o OAuth esteja indisponível, o sistema aceita autenticação com usuário e senha cadastrados na tabela `users`.

@@ -1,8 +1,9 @@
+<?php $baseUrl = rtrim($config['base_url'], '/'); ?>
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h3">Ficha do Aluno</h1>
     <div>
-        <a href="/?route=students/edit&id=<?= $student['id'] ?>" class="btn btn-primary">Editar</a>
-        <a href="/?route=students" class="btn btn-secondary">Voltar</a>
+        <a href="<?= htmlspecialchars($baseUrl . '/?route=students/edit&id=' . $student['id']) ?>" class="btn btn-primary">Editar</a>
+        <a href="<?= htmlspecialchars($baseUrl . '/?route=students') ?>" class="btn btn-secondary">Voltar</a>
     </div>
 </div>
 <div class="card mb-3">
@@ -35,9 +36,10 @@
     <div class="card-body">
         <ul class="list-group">
             <?php foreach ($documents as $doc): ?>
+                <?php $fileUrl = $baseUrl . '/uploads/' . $student['id'] . '/' . rawurlencode($doc['arquivo']); ?>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <span><?= htmlspecialchars(strtoupper(str_replace('_',' ', $doc['tipo']))) ?></span>
-                    <a href="/uploads/<?= $student['id'] ?>/<?= htmlspecialchars($doc['arquivo']) ?>" class="btn btn-sm btn-outline-primary" target="_blank">Visualizar</a>
+                    <a href="<?= htmlspecialchars($fileUrl) ?>" class="btn btn-sm btn-outline-primary" target="_blank">Visualizar</a>
                 </li>
             <?php endforeach; ?>
         </ul>

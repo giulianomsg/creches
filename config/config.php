@@ -1,7 +1,7 @@
 <?php
 return [
     'app_name' => 'Lista de Espera Creches',
-    'base_url' => getenv('APP_BASE_URL') ?: 'http://localhost',
+    'base_url' => rtrim(getenv('APP_BASE_URL') ?: 'http://localhost', '/'),
     'session_name' => 'creches_session',
     'google' => [
         'client_id' => getenv('GOOGLE_CLIENT_ID') ?: 'SEU_CLIENT_ID',

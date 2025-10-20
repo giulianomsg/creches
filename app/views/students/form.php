@@ -1,13 +1,14 @@
 <?php
+    $baseUrl = rtrim($config['base_url'], '/');
     $isEdit = !empty($student);
-    $action = $isEdit ? '/?route=students/update' : '/?route=students/store';
+    $action = $isEdit ? $baseUrl . '/?route=students/update' : $baseUrl . '/?route=students/store';
     $token = App\Helpers\CSRFHelper::token();
     $old = $_SESSION['form_old'] ?? [];
     $errors = $_SESSION['form_errors'] ?? [];
     unset($_SESSION['form_old'], $_SESSION['form_errors']);
 ?>
 <h1 class="h3 mb-3"><?= $isEdit ? 'Editar Cadastro' : 'Novo Cadastro' ?></h1>
-<form action="<?= $action ?>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+<form action="<?= htmlspecialchars($action) ?>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
     <input type="hidden" name="<?= $config['security']['csrf_token_name'] ?>" value="<?= $token ?>">
     <?php if ($isEdit): ?>
         <input type="hidden" name="id" value="<?= $student['id'] ?>">
@@ -273,6 +274,6 @@
 
     <div class="text-end">
         <button class="btn btn-success">Salvar</button>
-        <a href="/?route=students" class="btn btn-secondary">Cancelar</a>
+        <a href="<?= htmlspecialchars($baseUrl . '/?route=students') ?>" class="btn btn-secondary">Cancelar</a>
     </div>
 </form>

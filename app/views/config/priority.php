@@ -1,5 +1,6 @@
+<?php $baseUrl = rtrim($config['base_url'], '/'); ?>
 <h1 class="h3 mb-3">Configuração de Pontuação</h1>
-<form action="/?route=config/save-rules" method="post" class="card p-4">
+<form action="<?= htmlspecialchars($baseUrl . '/?route=config/save-rules') ?>" method="post" class="card p-4">
     <input type="hidden" name="<?= $config['security']['csrf_token_name'] ?>" value="<?= App\Helpers\CSRFHelper::token() ?>">
     <div class="row g-3">
         <?php foreach ($rules as $rule): ?>
