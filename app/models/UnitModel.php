@@ -11,6 +11,31 @@ class UnitModel extends BaseModel
         return $this->db->query('SELECT * FROM units ORDER BY name')->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function find(int $id): ?array
+    {
+        $stmt = $this->db->prepare('SELECT * FROM units WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+        $unit = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $unit ?: null;
+    }
+
+    public function existsByName(string $name, ?int $ignoreId = null): bool
+    {
+        $sql = 'SELECT COUNT(*) FROM units WHERE name = :name';
+        $params = ['name' => $name];
+
+        if ($ignoreId !== null) {
+            $sql .= ' AND id <> :id';
+            $params['id'] = $ignoreId;
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return (bool) $stmt->fetchColumn();
+    }
+
     public function create(array $data): int
     {
         $stmt = $this->db->prepare('INSERT INTO units (name, endereco, bairro, cep, latitude, longitude, capacidade) VALUES (:name, :endereco, :bairro, :cep, :latitude, :longitude, :capacidade)');

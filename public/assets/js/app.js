@@ -96,4 +96,22 @@ $(document).ready(function () {
         $(this).find('form')[0].reset();
         $('#unit_id').val('');
     });
+
+    const unitModalErrors = $('#unitModalErrors');
+    if (unitModalErrors.length && Number(unitModalErrors.data('show')) === 1) {
+        const oldData = unitModalErrors.data('old') || {};
+        $('#unit_id').val(oldData.id || '');
+        $('#unit_name').val(oldData.name || '');
+        $('#unit_endereco').val(oldData.endereco || '');
+        $('#unit_bairro').val(oldData.bairro || '');
+        $('#unit_cep').val(oldData.cep || '');
+        $('#unit_latitude').val(oldData.latitude || '');
+        $('#unit_longitude').val(oldData.longitude || '');
+        $('#unit_capacidade').val(oldData.capacidade || '');
+
+        const modalElement = document.getElementById('modalUnidade');
+        if (modalElement && typeof bootstrap !== 'undefined') {
+            bootstrap.Modal.getOrCreateInstance(modalElement).show();
+        }
+    }
 });
