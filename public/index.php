@@ -9,6 +9,7 @@ use App\Controllers\LogController;
 use App\Controllers\ReportController;
 use App\Controllers\StudentController;
 use App\Controllers\UnitController;
+use App\Controllers\UserController;
 use App\Core\Router;
 use App\Helpers\SessionHelper;
 
@@ -103,6 +104,30 @@ $router->post('/config/units/update', function () {
 });
 $router->post('/config/units/destroy', function () {
     $controller = new UnitController();
+    $controller->destroy();
+});
+$router->get('/config/users', function () {
+    $controller = new UserController();
+    return $controller->index();
+});
+$router->get('/config/users/create', function () {
+    $controller = new UserController();
+    return $controller->create();
+});
+$router->get('/config/users/edit', function () {
+    $controller = new UserController();
+    return $controller->edit();
+});
+$router->post('/config/users/store', function () {
+    $controller = new UserController();
+    $controller->store();
+});
+$router->post('/config/users/update', function () {
+    $controller = new UserController();
+    $controller->update();
+});
+$router->post('/config/users/destroy', function () {
+    $controller = new UserController();
     $controller->destroy();
 });
 $router->get('/config/priority', function () {

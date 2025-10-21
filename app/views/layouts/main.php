@@ -27,6 +27,7 @@
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Configurações</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="<?= htmlspecialchars($baseUrl . '/?route=config/units') ?>">Unidades</a></li>
+                            <li><a class="dropdown-item" href="<?= htmlspecialchars($baseUrl . '/?route=config/users') ?>">Usuários</a></li>
                             <li><a class="dropdown-item" href="<?= htmlspecialchars($baseUrl . '/?route=config/priority') ?>">Pontuação</a></li>
                             <li><a class="dropdown-item" href="<?= htmlspecialchars($baseUrl . '/?route=logs') ?>">Logs</a></li>
                         </ul>

@@ -27,6 +27,13 @@ $(document).ready(function () {
             }
         });
     }
+    if ($('#tableUsers').length) {
+        new DataTable('#tableUsers', {
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
+            }
+        });
+    }
 
     const chartEl = document.getElementById('chartVulnerabilidade');
     if (chartEl) {

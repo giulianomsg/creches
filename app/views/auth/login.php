@@ -49,7 +49,7 @@
                     <button type="submit" class="btn btn-primary w-100" <?= $hasLocalUsers ? '' : 'disabled' ?>>Entrar com usuário e senha</button>
                 </form>
 
-                <p class="mt-3 small text-muted">Para criar ou atualizar uma senha local, gere um hash seguro conforme orientações do README e atualize a coluna <strong>password_hash</strong> da tabela <strong>users</strong>.</p>
+                <p class="mt-3 small text-muted">Senhas locais podem ser gerenciadas diretamente no menu <strong>Configurações &gt; Usuários</strong>, disponível para administradores.</p>
             </div>
         </div>
     </div>
