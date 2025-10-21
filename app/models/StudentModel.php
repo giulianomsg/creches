@@ -115,4 +115,33 @@ class StudentModel extends BaseModel
         $stmt = $this->db->prepare('DELETE FROM students WHERE id = :id');
         $stmt->execute(['id' => $id]);
     }
+
+    public function demandByMacrorregiao(): array
+    {
+        $sql = "SELECT u.macrorregiao, COUNT(*) AS total FROM student_units su INNER JOIN units u ON u.id = su.unit_id INNER JOIN students s ON s.id = su.student_id WHERE su.priority = 1 GROUP BY u.macrorregiao ORDER BY total DESC";
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function heatmapPoints(): array
+    {
+        $sql = "SELECT latitude, longitude, COUNT(*) AS total FROM students WHERE latitude IS NOT NULL AND latitude <> '' AND longitude IS NOT NULL AND longitude <> '' AND status IN ('analise','lista_espera') GROUP BY latitude, longitude";
+        $stmt = $this->db->query($sql);
+        $points = [];
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $lat = (float) $row['latitude'];
+            $lng = (float) $row['longitude'];
+            if ($lat === 0.0 && $lng === 0.0) {
+                continue;
+            }
+            $points[] = [
+                'lat' => $lat,
+                'lng' => $lng,
+                'weight' => (int) $row['total'],
+            ];
+        }
+
+        return $points;
+    }
 }

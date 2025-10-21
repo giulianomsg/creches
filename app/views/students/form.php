@@ -79,7 +79,7 @@
         <div class="card-body row g-3">
             <div class="col-md-3">
                 <label class="form-label">CEP *</label>
-                <input type="text" name="cep" id="cep" class="form-control" value="<?= htmlspecialchars($old['cep'] ?? $student['cep'] ?? '') ?>" required>
+                <input type="text" name="cep" id="cep" class="form-control" value="<?= htmlspecialchars($old['cep'] ?? $student['cep'] ?? '') ?>" data-cep-autocomplete data-cep-logradouro="#endereco" data-cep-bairro="#bairro" required>
             </div>
             <div class="col-md-5">
                 <label class="form-label">Endereço *</label>

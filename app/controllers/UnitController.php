@@ -6,20 +6,17 @@ use App\Helpers\CSRFHelper;
 use App\Helpers\FlashHelper;
 use App\Helpers\SessionHelper;
 use App\Helpers\ValidationHelper;
-use App\Models\LogModel;
 use App\Models\UnitModel;
 use PDOException;
 
 class UnitController extends BaseController
 {
     private UnitModel $units;
-    private LogModel $logs;
 
     public function __construct()
     {
         parent::__construct();
         $this->units = new UnitModel();
-        $this->logs = new LogModel();
         $this->ensureAdmin();
     }
 
@@ -27,6 +24,7 @@ class UnitController extends BaseController
     {
         $units = $this->units->all();
         $user = SessionHelper::get('user');
+        $this->logActivity('view', 'Listagem de unidades escolares');
 
         return $this->render('units/index', compact('units', 'user'));
     }
@@ -35,6 +33,7 @@ class UnitController extends BaseController
     {
         [$errors, $old] = $this->recoverFormState();
         $user = SessionHelper::get('user');
+        $this->logActivity('view', 'Acesso ao formulário de criação de unidades escolares');
 
         return $this->render('units/form', [
             'user' => $user,
@@ -62,6 +61,7 @@ class UnitController extends BaseController
 
         [$errors, $old] = $this->recoverFormState($unit);
         $user = SessionHelper::get('user');
+        $this->logActivity('view', 'Acesso ao formulário de edição da unidade escolar #' . $id);
 
         return $this->render('units/form', [
             'user' => $user,
@@ -86,23 +86,13 @@ class UnitController extends BaseController
             $this->redirect('/?route=config/units/create');
         }
 
-        $user = SessionHelper::get('user');
-
         try {
             $newId = $this->units->create($data);
-            $this->logs->record([
-                'user_id' => $user['id'] ?? null,
-                'acao' => 'create',
-                'descricao' => 'Cadastro de unidade escolar #' . $newId,
-            ]);
+            $this->logActivity('create', 'Cadastro de unidade escolar #' . $newId);
             FlashHelper::add('success', 'Unidade criada com sucesso.');
         } catch (PDOException $exception) {
             $this->persistFormState(['general' => 'Erro ao salvar a unidade escolar. Tente novamente.'], $old);
-            $this->logs->record([
-                'user_id' => $user['id'] ?? null,
-                'acao' => 'error',
-                'descricao' => 'Falha ao criar unidade escolar: ' . $exception->getMessage(),
-            ]);
+            $this->logActivity('error', 'Falha ao criar unidade escolar: ' . $exception->getMessage());
             FlashHelper::add('danger', 'Erro ao salvar a unidade escolar.');
             $this->redirect('/?route=config/units/create');
         }
@@ -135,23 +125,13 @@ class UnitController extends BaseController
             $this->redirect('/?route=config/units/edit&id=' . $id);
         }
 
-        $user = SessionHelper::get('user');
-
         try {
             $this->units->update($id, $data);
-            $this->logs->record([
-                'user_id' => $user['id'] ?? null,
-                'acao' => 'update',
-                'descricao' => 'Atualização da unidade escolar #' . $id,
-            ]);
+            $this->logActivity('update', 'Atualização da unidade escolar #' . $id);
             FlashHelper::add('success', 'Unidade atualizada com sucesso.');
         } catch (PDOException $exception) {
             $this->persistFormState(['general' => 'Erro ao atualizar a unidade escolar.'], $old);
-            $this->logs->record([
-                'user_id' => $user['id'] ?? null,
-                'acao' => 'error',
-                'descricao' => 'Falha ao atualizar unidade escolar #' . $id . ': ' . $exception->getMessage(),
-            ]);
+            $this->logActivity('error', 'Falha ao atualizar unidade escolar #' . $id . ': ' . $exception->getMessage());
             FlashHelper::add('danger', 'Erro ao atualizar a unidade escolar.');
             $this->redirect('/?route=config/units/edit&id=' . $id);
         }
@@ -175,22 +155,12 @@ class UnitController extends BaseController
             $this->redirect('/?route=config/units');
         }
 
-        $user = SessionHelper::get('user');
-
         try {
             $this->units->delete($id);
-            $this->logs->record([
-                'user_id' => $user['id'] ?? null,
-                'acao' => 'delete',
-                'descricao' => 'Exclusão da unidade escolar #' . $id,
-            ]);
+            $this->logActivity('delete', 'Exclusão da unidade escolar #' . $id);
             FlashHelper::add('success', 'Unidade removida com sucesso.');
         } catch (PDOException $exception) {
-            $this->logs->record([
-                'user_id' => $user['id'] ?? null,
-                'acao' => 'error',
-                'descricao' => 'Falha ao excluir unidade escolar #' . $id . ': ' . $exception->getMessage(),
-            ]);
+            $this->logActivity('error', 'Falha ao excluir unidade escolar #' . $id . ': ' . $exception->getMessage());
             FlashHelper::add('danger', 'Não foi possível excluir a unidade. Verifique se existem cadastros vinculados.');
         }
 
@@ -219,7 +189,9 @@ class UnitController extends BaseController
         return [
             'name' => trim((string) ($_POST['name'] ?? '')),
             'endereco' => trim((string) ($_POST['endereco'] ?? '')),
+            'numero' => trim((string) ($_POST['numero'] ?? '')),
             'bairro' => trim((string) ($_POST['bairro'] ?? '')),
+            'macrorregiao' => trim((string) ($_POST['macrorregiao'] ?? '')),
             'cep' => trim((string) ($_POST['cep'] ?? '')),
             'latitude' => trim((string) ($_POST['latitude'] ?? '')),
             'longitude' => trim((string) ($_POST['longitude'] ?? '')),
@@ -232,8 +204,10 @@ class UnitController extends BaseController
         $errors = ValidationHelper::required($input, [
             'name' => 'Informe o nome da unidade escolar.',
             'endereco' => 'Informe o endereço completo.',
+            'numero' => 'Informe o número do endereço.',
             'bairro' => 'Informe o bairro.',
             'cep' => 'Informe o CEP da unidade.',
+            'macrorregiao' => 'Informe a macrorregião de atendimento.',
             'capacidade' => 'Informe a capacidade de vagas.',
         ]);
 
@@ -269,10 +243,25 @@ class UnitController extends BaseController
             $errors['name'] = 'Já existe uma unidade cadastrada com este nome.';
         }
 
+        $macrorregiao = $input['macrorregiao'];
+        if ($macrorregiao !== '') {
+            $normalizedMacro = mb_convert_case($macrorregiao, MB_CASE_TITLE, 'UTF-8');
+            $input['macrorregiao'] = $normalizedMacro;
+            $old['macrorregiao'] = $normalizedMacro;
+        }
+
+        if ($input['numero'] !== '') {
+            $normalizedNumero = mb_strtoupper($input['numero']);
+            $input['numero'] = $normalizedNumero;
+            $old['numero'] = $normalizedNumero;
+        }
+
         $data = [
             'name' => $input['name'],
             'endereco' => $input['endereco'],
+            'numero' => $input['numero'],
             'bairro' => $input['bairro'],
+            'macrorregiao' => $input['macrorregiao'],
             'cep' => $input['cep'],
             'latitude' => $input['latitude'] !== '' ? $input['latitude'] : null,
             'longitude' => $input['longitude'] !== '' ? $input['longitude'] : null,

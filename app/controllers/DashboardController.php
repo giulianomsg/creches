@@ -38,10 +38,21 @@ class DashboardController extends BaseController
         $emAnalise = count(array_filter($students, fn($s) => $s['status'] === 'analise'));
         $comVaga = count(array_filter($students, fn($s) => $s['status'] === 'vaga_concedida'));
         $units = $this->units->all();
+        $macroDemand = $this->students->demandByMacrorregiao();
+        $macroLabels = array_map(
+            static function ($label) {
+                return ($label !== null && $label !== '') ? $label : 'Não informada';
+            },
+            array_column($macroDemand, 'macrorregiao')
+        );
+        $macroValues = array_map('intval', array_column($macroDemand, 'total'));
+        $heatmapPoints = $this->students->heatmapPoints();
 
         $vulnerabilidadeAlta = count(array_filter($students, fn($s) => (int)$s['alta_vulnerabilidade'] === 1));
         $vulnerabilidadeMedia = count(array_filter($students, fn($s) => (int)$s['media_vulnerabilidade'] === 1));
         $necessidadesEspeciais = count(array_filter($students, fn($s) => (int)$s['necessidades_especiais'] === 1));
+
+        $this->logActivity('view', 'Acesso ao painel inicial');
 
         return $this->render('dashboard/index', compact(
             'user',
@@ -52,7 +63,11 @@ class DashboardController extends BaseController
             'units',
             'vulnerabilidadeAlta',
             'vulnerabilidadeMedia',
-            'necessidadesEspeciais'
+            'necessidadesEspeciais',
+            'macroLabels',
+            'macroValues',
+            'macroDemand',
+            'heatmapPoints'
         ));
     }
 }

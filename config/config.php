@@ -23,4 +23,5 @@ return [
     ],
     'logs_path' => __DIR__ . '/../app/logs/',
     'uploads_path' => __DIR__ . '/../app/uploads/',
+    'macrorregioes' => array_values(array_filter(array_map('trim', explode(',', getenv('APP_MACROREGIONS') ?: 'Centro,Norte,Sul,Leste,Oeste')))),
 ];

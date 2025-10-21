@@ -14,6 +14,7 @@ $baseUrl = rtrim($config['base_url'], '/');
         <thead>
         <tr>
             <th>Nome</th>
+            <th>Macrorregião</th>
             <th>Bairro</th>
             <th>CEP</th>
             <th>Capacidade</th>
@@ -24,6 +25,7 @@ $baseUrl = rtrim($config['base_url'], '/');
         <?php foreach ($units as $unit): ?>
             <tr>
                 <td><?= htmlspecialchars($unit['name']) ?></td>
+                <td><?= htmlspecialchars($unit['macrorregiao'] ?? 'Não informada') ?></td>
                 <td><?= htmlspecialchars($unit['bairro']) ?></td>
                 <td><?= htmlspecialchars($unit['cep']) ?></td>
                 <td><?= htmlspecialchars((string) $unit['capacidade']) ?></td>

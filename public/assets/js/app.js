@@ -70,19 +70,6 @@ $(document).ready(function () {
         $(this).closest('.input-group, .row').remove();
     });
 
-    $('#cep').on('blur', function () {
-        const cep = $(this).val().replace(/\D/g, '');
-        if (cep.length === 8) {
-            fetch(`https://viacep.com.br/ws/${cep}/json/`).then(r => r.json()).then(data => {
-                if (data.erro) return;
-                $('#endereco').val(data.logradouro);
-                $('#bairro').val(data.bairro);
-                $('#endereco').trigger('change');
-                $('#bairro').trigger('change');
-            });
-        }
-    });
-
     function debounce(fn, wait) {
         let timeout;
         return function () {
@@ -92,6 +79,81 @@ $(document).ready(function () {
                 fn.apply(null, args);
             }, wait);
         };
+    }
+
+    function formatCep(value) {
+        if (typeof value !== 'string') {
+            return '';
+        }
+        const digits = value.replace(/\D/g, '');
+        if (digits.length !== 8) {
+            return value;
+        }
+        return digits.substring(0, 5) + '-' + digits.substring(5);
+    }
+
+    function fillInput(selector, value) {
+        if (!selector) {
+            return;
+        }
+        const $target = $(selector);
+        if (!$target.length) {
+            return;
+        }
+        $target.val(value || '');
+        $target.trigger('change');
+        $target.trigger('blur');
+        $target.trigger('keyup');
+    }
+
+    function setupCepAutocomplete() {
+        $('[data-cep-autocomplete]').each(function () {
+            const $input = $(this);
+
+            const initial = $input.val();
+            if (initial) {
+                const formattedInitial = formatCep(initial.toString());
+                if (formattedInitial !== initial) {
+                    $input.val(formattedInitial);
+                }
+            }
+
+            let lastDigits = '';
+
+            const handleCepLookup = function () {
+                const raw = $input.val();
+                const digits = raw ? raw.toString().replace(/\D/g, '') : '';
+                if (digits.length !== 8) {
+                    lastDigits = '';
+                    return;
+                }
+
+                if (digits === lastDigits) {
+                    return;
+                }
+                lastDigits = digits;
+
+                fetch(`https://viacep.com.br/ws/${digits}/json/`)
+                    .then(function (response) { return response.ok ? response.json() : null; })
+                    .then(function (data) {
+                        if (!data || data.erro) {
+                            lastDigits = '';
+                            return;
+                        }
+                        const formatted = formatCep(digits);
+                        $input.val(formatted);
+                        fillInput($input.data('cepLogradouro'), data.logradouro || '');
+                        fillInput($input.data('cepBairro'), data.bairro || '');
+                    })
+                    .catch(function () {
+                        lastDigits = '';
+                        // ignora falhas de rede
+                    });
+            };
+
+            $input.on('blur', handleCepLookup);
+            $input.on('change', handleCepLookup);
+        });
     }
 
     function parseCoordinate(value) {
@@ -235,4 +297,141 @@ $(document).ready(function () {
     }
 
     initCoordinateMaps();
+    setupCepAutocomplete();
+
+    const macroChartEl = document.getElementById('chartMacroRegiao');
+    if (macroChartEl) {
+        try {
+            const labels = JSON.parse(macroChartEl.dataset.labels || '[]');
+            const values = JSON.parse(macroChartEl.dataset.values || '[]').map(function (value) {
+                return Number.parseInt(value, 10) || 0;
+            });
+
+            if (labels.length && values.length) {
+                new Chart(macroChartEl.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Solicitações',
+                            data: values,
+                            backgroundColor: '#0d6efd',
+                            borderRadius: 6,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        } catch (error) {
+            console.warn('Não foi possível inicializar o gráfico de macrorregiões.', error);
+        }
+    }
+
+    function initHeatmap() {
+        if (typeof L === 'undefined') {
+            return;
+        }
+
+        const container = document.getElementById('dashboardHeatmap');
+        if (!container) {
+            return;
+        }
+
+        let points = [];
+        try {
+            points = JSON.parse(container.dataset.points || '[]');
+        } catch (error) {
+            console.warn('Não foi possível ler os pontos do mapa de calor.', error);
+        }
+
+        const defaultCenterAttr = container.getAttribute('data-default-center') || '-20.811307,-49.375781';
+        const centerParts = defaultCenterAttr.split(',').map(function (value) {
+            return parseFloat(value);
+        });
+        const defaultCenter = [
+            Number.isFinite(centerParts[0]) ? centerParts[0] : -20.811307,
+            Number.isFinite(centerParts[1]) ? centerParts[1] : -49.375781
+        ];
+
+        const map = L.map(container).setView(defaultCenter, 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap colaboradores'
+        }).addTo(map);
+
+        if (points.length) {
+            const group = L.layerGroup().addTo(map);
+            let maxWeight = 0;
+            const bounds = [];
+
+            points.forEach(function (point) {
+                const lat = parseFloat(point.lat);
+                const lng = parseFloat(point.lng);
+                const weight = Number.isFinite(point.weight) ? point.weight : 1;
+                if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+                    return;
+                }
+                maxWeight = Math.max(maxWeight, weight);
+                bounds.push([lat, lng]);
+            });
+
+            const resolveColor = function (intensity) {
+                if (intensity < 0.33) {
+                    return '#0d6efd';
+                }
+                if (intensity < 0.66) {
+                    return '#ffc107';
+                }
+                return '#dc3545';
+            };
+
+            points.forEach(function (point) {
+                const lat = parseFloat(point.lat);
+                const lng = parseFloat(point.lng);
+                const weight = Number.isFinite(point.weight) ? point.weight : 1;
+                if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+                    return;
+                }
+                const intensity = maxWeight > 0 ? weight / maxWeight : 0;
+                const color = resolveColor(intensity);
+                const radius = 150 + (intensity * 350);
+                L.circle([lat, lng], {
+                    radius: radius,
+                    stroke: false,
+                    fillColor: color,
+                    fillOpacity: 0.45
+                }).addTo(group);
+            });
+
+            if (bounds.length) {
+                map.fitBounds(bounds, { padding: [30, 30] });
+            }
+        }
+
+        const legend = L.control({ position: 'bottomright' });
+        legend.onAdd = function () {
+            const div = L.DomUtil.create('div', 'heatmap-legend');
+            div.innerHTML = '<div class="fw-semibold">Intensidade</div>' +
+                '<div class="gradient-bar"></div>' +
+                '<div class="d-flex justify-content-between mt-1"><small>Menor</small><small>Maior</small></div>';
+            return div;
+        };
+        legend.addTo(map);
+
+        setTimeout(function () {
+            map.invalidateSize();
+        }, 300);
+    }
+
+    initHeatmap();
 });

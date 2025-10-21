@@ -28,6 +28,7 @@ class LogController extends BaseController
     {
         $user = SessionHelper::get('user');
         $logs = $this->logs->all();
+        $this->logActivity('view', 'Visualização dos registros de auditoria');
         return $this->render('logs/index', compact('logs', 'user'));
     }
 }

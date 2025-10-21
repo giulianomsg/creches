@@ -31,6 +31,7 @@ class ConfigController extends BaseController
     {
         $user = SessionHelper::get('user');
         $rules = $this->rules->all();
+        $this->logActivity('view', 'Acesso à configuração de prioridades');
         return $this->render('config/priority', compact('rules', 'user'));
     }
 
@@ -38,6 +39,7 @@ class ConfigController extends BaseController
     {
         $this->validateCsrf('/?route=config/priority');
         $this->rules->updateWeights($_POST['peso'] ?? []);
+        $this->logActivity('update', 'Atualização dos pesos de prioridade');
         FlashHelper::add('success', 'Pesos atualizados.');
         $this->redirect('/?route=config/priority');
     }

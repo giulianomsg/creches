@@ -46,12 +46,14 @@ class ReportController extends BaseController
             $student['pontuacao'] = $this->priorityService->calculateScore($student);
         }
 
+        $this->logActivity('view', 'Acesso ao módulo de relatórios');
         return $this->render('reports/index', compact('students', 'units', 'user'));
     }
 
     public function exportCsv(): void
     {
         $students = $this->students->all();
+        $this->logActivity('export', 'Exportação de relatório em CSV');
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="relatorio.csv"');
         $output = fopen('php://output', 'w');
@@ -71,6 +73,7 @@ class ReportController extends BaseController
     public function exportExcel(): void
     {
         $students = $this->students->all();
+        $this->logActivity('export', 'Exportação de relatório em Excel');
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->fromArray(['Nome', 'Data de Nascimento', 'Status', 'Pontuação'], null, 'A1');
@@ -93,6 +96,7 @@ class ReportController extends BaseController
     public function exportPdf(): void
     {
         $students = $this->students->all();
+        $this->logActivity('export', 'Exportação de relatório em PDF');
         $html = '<h1>Relatório de Lista de Espera</h1><table border="1" width="100%" cellspacing="0" cellpadding="4">';
         $html .= '<tr><th>Nome</th><th>Data de Nascimento</th><th>Status</th><th>Pontuação</th></tr>';
         foreach ($students as $student) {

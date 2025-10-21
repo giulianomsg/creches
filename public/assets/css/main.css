@@ -15,3 +15,25 @@ body {
     height: 320px;
     width: 100%;
 }
+
+.heatmap-map {
+    height: 360px;
+    width: 100%;
+}
+
+.heatmap-legend {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1.25rem rgba(18, 38, 63, 0.15);
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    line-height: 1.2;
+}
+
+.heatmap-legend .gradient-bar {
+    height: 8px;
+    width: 140px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #0d6efd 0%, #ffc107 50%, #dc3545 100%);
+    margin-top: 0.35rem;
+}

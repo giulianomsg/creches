@@ -8,7 +8,6 @@ use App\Helpers\SessionHelper;
 use App\Helpers\UploadHelper;
 use App\Helpers\ValidationHelper;
 use App\Models\DocumentModel;
-use App\Models\LogModel;
 use App\Models\StudentEnrolledSiblingModel;
 use App\Models\StudentModel;
 use App\Models\StudentUnitModel;
@@ -25,7 +24,6 @@ class StudentController extends BaseController
     private StudentWaitingSiblingModel $waitingSiblings;
     private StudentEnrolledSiblingModel $enrolledSiblings;
     private UnitModel $units;
-    private LogModel $logs;
     private GeoService $geoService;
     private PriorityService $priorityService;
 
@@ -38,7 +36,6 @@ class StudentController extends BaseController
         $this->waitingSiblings = new StudentWaitingSiblingModel();
         $this->enrolledSiblings = new StudentEnrolledSiblingModel();
         $this->units = new UnitModel();
-        $this->logs = new LogModel();
         $this->geoService = new GeoService();
         $this->priorityService = new PriorityService();
         $this->ensureAuthenticated();
@@ -73,6 +70,7 @@ class StudentController extends BaseController
             $student['pontuacao'] = $this->priorityService->calculateScore($student);
         }
 
+        $this->logActivity('view', 'Listagem de cadastros de alunos');
         return $this->render('students/index', compact('students', 'user'));
     }
 
@@ -85,6 +83,7 @@ class StudentController extends BaseController
         $enrolledSiblings = [];
         $preferences = [];
 
+        $this->logActivity('view', 'Acesso ao formulário de cadastro de aluno');
         return $this->render('students/form', compact('student', 'units', 'waitingSiblings', 'enrolledSiblings', 'preferences', 'user'));
     }
 
@@ -122,11 +121,7 @@ class StudentController extends BaseController
         $formatted = array_map(fn($nome, $escola) => ['nome' => $nome, 'escola' => $escola], $enrolled['nome'] ?? [], $enrolled['escola'] ?? []);
         $this->enrolledSiblings->saveList($studentId, $formatted);
 
-        $this->logs->record([
-            'user_id' => $user['id'],
-            'acao' => 'create',
-            'descricao' => 'Cadastro de aluno #' . $studentId,
-        ]);
+        $this->logActivity('create', 'Cadastro de aluno #' . $studentId, (int) $user['id']);
 
         FlashHelper::add('success', 'Aluno cadastrado com sucesso.');
         $this->redirect('/?route=students');
@@ -142,6 +137,7 @@ class StudentController extends BaseController
             $this->redirect('/?route=students');
         }
 
+        $this->logActivity('view', 'Acesso ao formulário de edição do aluno #' . $id);
         $units = $this->units->all();
         $waitingSiblings = $this->waitingSiblings->list($id);
         $enrolledSiblings = $this->enrolledSiblings->list($id);
@@ -184,11 +180,7 @@ class StudentController extends BaseController
         $formatted = array_map(fn($nome, $escola) => ['nome' => $nome, 'escola' => $escola], $enrolled['nome'] ?? [], $enrolled['escola'] ?? []);
         $this->enrolledSiblings->saveList($id, $formatted);
 
-        $this->logs->record([
-            'user_id' => $user['id'],
-            'acao' => 'update',
-            'descricao' => 'Atualização do aluno #' . $id,
-        ]);
+        $this->logActivity('update', 'Atualização do aluno #' . $id, (int) $user['id']);
 
         FlashHelper::add('success', 'Cadastro atualizado com sucesso.');
         $this->redirect('/?route=students');
@@ -212,11 +204,7 @@ class StudentController extends BaseController
         $this->students->delete($id);
 
         $user = SessionHelper::get('user');
-        $this->logs->record([
-            'user_id' => $user['id'],
-            'acao' => 'delete',
-            'descricao' => 'Exclusão do aluno #' . $id,
-        ]);
+        $this->logActivity('delete', 'Exclusão do aluno #' . $id, (int) $user['id']);
 
         FlashHelper::add('success', 'Aluno removido.');
         $this->redirect('/?route=students');
@@ -232,6 +220,7 @@ class StudentController extends BaseController
             $this->redirect('/?route=students');
         }
 
+        $this->logActivity('view', 'Visualização do cadastro do aluno #' . $id);
         $documents = $this->documents->byStudent($id);
         $waitingSiblings = $this->waitingSiblings->list($id);
         $enrolledSiblings = $this->enrolledSiblings->list($id);

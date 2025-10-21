@@ -5,7 +5,6 @@ namespace App\Controllers;
 use App\Helpers\CSRFHelper;
 use App\Helpers\FlashHelper;
 use App\Helpers\SessionHelper;
-use App\Models\LogModel;
 use App\Models\UserModel;
 use App\Services\GoogleOAuthService;
 
@@ -13,14 +12,12 @@ class AuthController extends BaseController
 {
     private GoogleOAuthService $googleOAuthService;
     private UserModel $users;
-    private LogModel $logs;
 
     public function __construct()
     {
         parent::__construct();
         $this->googleOAuthService = new GoogleOAuthService();
         $this->users = new UserModel();
-        $this->logs = new LogModel();
     }
 
     public function login(): string
@@ -111,14 +108,10 @@ class AuthController extends BaseController
     public function logout(): void
     {
         $user = SessionHelper::get('user');
-        SessionHelper::destroy();
         if ($user) {
-            $this->logs->record([
-                'user_id' => $user['id'],
-                'acao' => 'logout',
-                'descricao' => 'Logout do usuário',
-            ]);
+            $this->logActivity('logout', 'Logout do usuário', (int) $user['id']);
         }
+        SessionHelper::destroy();
         $this->redirect('/login.php');
     }
 
@@ -129,13 +122,7 @@ class AuthController extends BaseController
 
         SessionHelper::set('user', $user);
 
-        if ($userId > 0) {
-            $this->logs->record([
-                'user_id' => $userId,
-                'acao' => 'login',
-                'descricao' => 'Login realizado via ' . $method,
-            ]);
-        }
+        $this->logActivity('login', 'Login realizado via ' . $method, $userId > 0 ? $userId : null);
 
         FlashHelper::add('success', 'Autenticação realizada com sucesso.');
         $this->redirect('/');
