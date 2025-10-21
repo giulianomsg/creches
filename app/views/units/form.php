@@ -52,6 +52,11 @@ $actionUrl = $baseUrl . $formAction;
         <input type="text" class="form-control<?= isset($errors['longitude']) ? ' is-invalid' : '' ?>" id="unit_longitude" name="longitude" value="<?= htmlspecialchars($old['longitude'] ?? ($unit['longitude'] ?? '')) ?>">
         <?php if (isset($errors['longitude'])): ?><div class="invalid-feedback d-block"><?= htmlspecialchars($errors['longitude']) ?></div><?php endif; ?>
     </div>
+    <div class="col-12">
+        <label class="form-label">Localização no mapa</label>
+        <div id="unitLocationMap" class="coordinate-map border rounded" data-lat-input="#unit_latitude" data-lng-input="#unit_longitude" data-address-fields="#unit_endereco,#unit_bairro,#unit_cep" data-geocode-context="São José do Rio Preto - SP"></div>
+        <div class="form-text">Arraste o marcador para ajustar a referência geográfica da unidade.</div>
+    </div>
     <div class="col-md-4">
         <label for="unit_capacidade" class="form-label">Capacidade de vagas</label>
         <input type="number" min="0" class="form-control<?= isset($errors['capacidade']) ? ' is-invalid' : '' ?>" id="unit_capacidade" name="capacidade" value="<?= htmlspecialchars($old['capacidade'] ?? ($unit['capacidade'] ?? '')) ?>" required>

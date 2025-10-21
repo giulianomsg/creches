@@ -87,7 +87,7 @@
             </div>
             <div class="col-md-2">
                 <label class="form-label">Número *</label>
-                <input type="text" name="numero" class="form-control" value="<?= htmlspecialchars($old['numero'] ?? $student['numero'] ?? '') ?>" required>
+                <input type="text" name="numero" id="numero" class="form-control" value="<?= htmlspecialchars($old['numero'] ?? $student['numero'] ?? '') ?>" required>
             </div>
             <div class="col-md-2">
                 <label class="form-label">Complemento</label>
@@ -99,11 +99,16 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label">Latitude</label>
-                <input type="text" name="latitude" class="form-control" value="<?= htmlspecialchars($old['latitude'] ?? $student['latitude'] ?? '') ?>">
+                <input type="text" name="latitude" id="student_latitude" class="form-control" value="<?= htmlspecialchars($old['latitude'] ?? $student['latitude'] ?? '') ?>">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Longitude</label>
-                <input type="text" name="longitude" class="form-control" value="<?= htmlspecialchars($old['longitude'] ?? $student['longitude'] ?? '') ?>">
+                <input type="text" name="longitude" id="student_longitude" class="form-control" value="<?= htmlspecialchars($old['longitude'] ?? $student['longitude'] ?? '') ?>">
+            </div>
+            <div class="col-12">
+                <label class="form-label">Localização aproximada</label>
+                <div id="studentLocationMap" class="coordinate-map border rounded" data-lat-input="#student_latitude" data-lng-input="#student_longitude" data-address-fields="#endereco,#numero,#bairro,#cep" data-geocode-context="São José do Rio Preto - SP"></div>
+                <div class="form-text">Arraste o marcador para ajustar a posição ou preencha o endereço para localizar automaticamente.</div>
             </div>
             <div class="col-12">
                 <label class="form-label">Comprovante de Residência</label>

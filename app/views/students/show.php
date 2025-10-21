@@ -29,6 +29,12 @@
         <div class="col-md-4"><strong>CEP:</strong> <?= htmlspecialchars($student['cep']) ?></div>
         <div class="col-md-2"><strong>Latitude:</strong> <?= htmlspecialchars($student['latitude']) ?></div>
         <div class="col-md-2"><strong>Longitude:</strong> <?= htmlspecialchars($student['longitude']) ?></div>
+        <?php if (!empty($student['latitude']) && !empty($student['longitude'])): ?>
+            <div class="col-12">
+                <div id="studentLocationMapView" class="coordinate-map border rounded" data-lat-value="<?= htmlspecialchars($student['latitude']) ?>" data-lng-value="<?= htmlspecialchars($student['longitude']) ?>" data-zoom="15"></div>
+                <small class="text-muted d-block mt-2">Posição aproximada informada para o endereço residencial.</small>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 <div class="card mb-3">

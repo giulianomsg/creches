@@ -10,3 +10,8 @@ body {
 .table thead th {
     background-color: #f1f4f9;
 }
+
+.coordinate-map {
+    height: 320px;
+    width: 100%;
+}
