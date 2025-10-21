@@ -8,7 +8,7 @@
     <title><?= htmlspecialchars($config['app_name']) ?></title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.7/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha512-m0RvrR0mRdB0O85xAvn38DSHLVQQP4SRrped1IovnHgwlHGawEq+yLkOlWd0x2h8ailqXF/w3vY9Vx0QWii0Rg==" crossorigin="" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="<?= htmlspecialchars($baseUrl . '/assets/css/main.css') ?>">
 </head>
 <body>
@@ -56,7 +56,7 @@
 <script src="https://cdn.datatables.net/2.0.7/js/dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/2.0.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha512-Vxe3G8Q7S+0wz4k0t9UcRgxN6E466+vWXTjhFRu9GaLxgPLZld0dfT8hSdPNgm6kKiC9QcTxyO51h0QzC2BXdQ==" crossorigin="" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-1VWM1BnI1GvclYBky5f5Y9HqeThmQUwCWQbsFQM1Eu0=" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="<?= htmlspecialchars($baseUrl . '/assets/js/app.js') ?>"></script>
 </body>
 </html>
