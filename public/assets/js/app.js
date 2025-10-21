@@ -20,8 +20,8 @@ $(document).ready(function () {
             }
         });
     }
-    if ($('#tableUnidades').length) {
-        new DataTable('#tableUnidades', {
+    if ($('#tableUnits').length) {
+        new DataTable('#tableUnits', {
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json'
             }
@@ -81,37 +81,5 @@ $(document).ready(function () {
         }
     });
 
-    $('#modalUnidade').on('show.bs.modal', function (event) {
-        const button = $(event.relatedTarget);
-        const unitData = button.closest('tr').data('unit') || {};
-        $('#unit_id').val(unitData.id || '');
-        $('#unit_name').val(unitData.name || '');
-        $('#unit_endereco').val(unitData.endereco || '');
-        $('#unit_bairro').val(unitData.bairro || '');
-        $('#unit_cep').val(unitData.cep || '');
-        $('#unit_latitude').val(unitData.latitude || '');
-        $('#unit_longitude').val(unitData.longitude || '');
-        $('#unit_capacidade').val(unitData.capacidade || '');
-    }).on('hidden.bs.modal', function () {
-        $(this).find('form')[0].reset();
-        $('#unit_id').val('');
-    });
-
-    const unitModalErrors = $('#unitModalErrors');
-    if (unitModalErrors.length && Number(unitModalErrors.data('show')) === 1) {
-        const oldData = unitModalErrors.data('old') || {};
-        $('#unit_id').val(oldData.id || '');
-        $('#unit_name').val(oldData.name || '');
-        $('#unit_endereco').val(oldData.endereco || '');
-        $('#unit_bairro').val(oldData.bairro || '');
-        $('#unit_cep').val(oldData.cep || '');
-        $('#unit_latitude').val(oldData.latitude || '');
-        $('#unit_longitude').val(oldData.longitude || '');
-        $('#unit_capacidade').val(oldData.capacidade || '');
-
-        const modalElement = document.getElementById('modalUnidade');
-        if (modalElement && typeof bootstrap !== 'undefined') {
-            bootstrap.Modal.getOrCreateInstance(modalElement).show();
-        }
-    }
+    // sem lógica adicional para unidades; telas dedicadas cuidam do preenchimento
 });

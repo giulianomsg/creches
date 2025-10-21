@@ -8,6 +8,7 @@ use App\Controllers\DashboardController;
 use App\Controllers\LogController;
 use App\Controllers\ReportController;
 use App\Controllers\StudentController;
+use App\Controllers\UnitController;
 use App\Core\Router;
 use App\Helpers\SessionHelper;
 
@@ -81,16 +82,28 @@ $router->get('/reports/export-pdf', function () {
 });
 
 $router->get('/config/units', function () {
-    $controller = new ConfigController();
-    return $controller->units();
+    $controller = new UnitController();
+    return $controller->index();
 });
-$router->post('/config/save-unit', function () {
-    $controller = new ConfigController();
-    $controller->saveUnit();
+$router->get('/config/units/create', function () {
+    $controller = new UnitController();
+    return $controller->create();
 });
-$router->post('/config/delete-unit', function () {
-    $controller = new ConfigController();
-    $controller->deleteUnit();
+$router->get('/config/units/edit', function () {
+    $controller = new UnitController();
+    return $controller->edit();
+});
+$router->post('/config/units/store', function () {
+    $controller = new UnitController();
+    $controller->store();
+});
+$router->post('/config/units/update', function () {
+    $controller = new UnitController();
+    $controller->update();
+});
+$router->post('/config/units/destroy', function () {
+    $controller = new UnitController();
+    $controller->destroy();
 });
 $router->get('/config/priority', function () {
     $controller = new ConfigController();
