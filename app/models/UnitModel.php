@@ -38,7 +38,7 @@ class UnitModel extends BaseModel
 
     public function create(array $data): int
     {
-        $stmt = $this->db->prepare('INSERT INTO units (name, endereco, numero, bairro, macrorregiao, cep, latitude, longitude, capacidade) VALUES (:name, :endereco, :numero, :bairro, :macrorregiao, :cep, :latitude, :longitude, :capacidade)');
+        $stmt = $this->db->prepare('INSERT INTO units (name, endereco, numero, bairro, macrorregiao, cep, latitude, longitude, capacidade, telefone_fixo, telefone_celular, whatsapp, email) VALUES (:name, :endereco, :numero, :bairro, :macrorregiao, :cep, :latitude, :longitude, :capacidade, :telefone_fixo, :telefone_celular, :whatsapp, :email)');
         $stmt->execute($data);
         return (int) $this->db->lastInsertId();
     }
@@ -46,7 +46,7 @@ class UnitModel extends BaseModel
     public function update(int $id, array $data): void
     {
         $data['id'] = $id;
-        $stmt = $this->db->prepare('UPDATE units SET name = :name, endereco = :endereco, numero = :numero, bairro = :bairro, macrorregiao = :macrorregiao, cep = :cep, latitude = :latitude, longitude = :longitude, capacidade = :capacidade WHERE id = :id');
+        $stmt = $this->db->prepare('UPDATE units SET name = :name, endereco = :endereco, numero = :numero, bairro = :bairro, macrorregiao = :macrorregiao, cep = :cep, latitude = :latitude, longitude = :longitude, capacidade = :capacidade, telefone_fixo = :telefone_fixo, telefone_celular = :telefone_celular, whatsapp = :whatsapp, email = :email WHERE id = :id');
         $stmt->execute($data);
     }
 

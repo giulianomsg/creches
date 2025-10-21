@@ -434,4 +434,66 @@ $(document).ready(function () {
     }
 
     initHeatmap();
+
+    function buildWhatsappUrl(value) {
+        if (!value) {
+            return null;
+        }
+
+        var digits = value.toString().replace(/\D/g, '');
+        if (!digits.length) {
+            return null;
+        }
+
+        if (digits.substring(0, 2) === '55' && digits.length > 11) {
+            digits = digits.substring(2);
+        }
+
+        if (digits.length < 10 || digits.length > 11) {
+            return null;
+        }
+
+        return 'https://wa.me/55' + digits;
+    }
+
+    function setupWhatsappLaunchers() {
+        document.querySelectorAll('[data-whatsapp-input]').forEach(function (input) {
+            var targetSelector = input.getAttribute('data-whatsapp-target');
+            if (!targetSelector) {
+                return;
+            }
+
+            var launcher = document.querySelector(targetSelector);
+            if (!launcher) {
+                return;
+            }
+
+            var updateLink = function () {
+                var link = buildWhatsappUrl(input.value);
+                if (link) {
+                    launcher.classList.remove('disabled');
+                    launcher.removeAttribute('aria-disabled');
+                    launcher.setAttribute('href', link);
+                } else {
+                    launcher.classList.add('disabled');
+                    launcher.setAttribute('aria-disabled', 'true');
+                    launcher.setAttribute('href', '#');
+                }
+            };
+
+            ['input', 'change', 'blur'].forEach(function (evt) {
+                input.addEventListener(evt, updateLink);
+            });
+
+            launcher.addEventListener('click', function (event) {
+                if (launcher.classList.contains('disabled') || launcher.getAttribute('href') === '#') {
+                    event.preventDefault();
+                }
+            });
+
+            updateLink();
+        });
+    }
+
+    setupWhatsappLaunchers();
 });

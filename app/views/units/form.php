@@ -2,6 +2,24 @@
 $baseUrl = rtrim($config['base_url'], '/');
 $errors = $errors ?? [];
 $old = $old ?? [];
+$formatPhone = static function ($value) {
+    if ($value === null || $value === '') {
+        return '';
+    }
+
+    $digits = preg_replace('/\D/', '', (string) $value);
+    $length = strlen($digits);
+
+    if ($length === 11) {
+        return sprintf('(%s) %s-%s', substr($digits, 0, 2), substr($digits, 2, 5), substr($digits, 7));
+    }
+
+    if ($length === 10) {
+        return sprintf('(%s) %s-%s', substr($digits, 0, 2), substr($digits, 2, 4), substr($digits, 6));
+    }
+
+    return $value;
+};
 $isEdit = !empty($unit);
 $actionUrl = $baseUrl . $formAction;
 ?>
@@ -61,6 +79,34 @@ $actionUrl = $baseUrl . $formAction;
         <label for="unit_capacidade" class="form-label">Capacidade de vagas</label>
         <input type="number" min="0" class="form-control<?= isset($errors['capacidade']) ? ' is-invalid' : '' ?>" id="unit_capacidade" name="capacidade" value="<?= htmlspecialchars($old['capacidade'] ?? ($unit['capacidade'] ?? '')) ?>" required>
         <?php if (isset($errors['capacidade'])): ?><div class="invalid-feedback d-block"><?= htmlspecialchars($errors['capacidade']) ?></div><?php endif; ?>
+    </div>
+    <div class="col-md-3">
+        <label for="unit_telefone_fixo" class="form-label">Telefone fixo</label>
+        <input type="tel" class="form-control<?= isset($errors['telefone_fixo']) ? ' is-invalid' : '' ?>" id="unit_telefone_fixo" name="telefone_fixo" value="<?= htmlspecialchars($formatPhone($old['telefone_fixo'] ?? ($unit['telefone_fixo'] ?? ''))) ?>" placeholder="(17) 3210-0000">
+        <?php if (isset($errors['telefone_fixo'])): ?><div class="invalid-feedback d-block"><?= htmlspecialchars($errors['telefone_fixo']) ?></div><?php endif; ?>
+        <div class="form-text">Informe o DDD seguido do número.</div>
+    </div>
+    <div class="col-md-3">
+        <label for="unit_telefone_celular" class="form-label">Telefone celular</label>
+        <input type="tel" class="form-control<?= isset($errors['telefone_celular']) ? ' is-invalid' : '' ?>" id="unit_telefone_celular" name="telefone_celular" value="<?= htmlspecialchars($formatPhone($old['telefone_celular'] ?? ($unit['telefone_celular'] ?? ''))) ?>" placeholder="(17) 99100-0000">
+        <?php if (isset($errors['telefone_celular'])): ?><div class="invalid-feedback d-block"><?= htmlspecialchars($errors['telefone_celular']) ?></div><?php endif; ?>
+        <div class="form-text">Inclua o DDD e utilize apenas números se preferir.</div>
+    </div>
+    <div class="col-md-3">
+        <label for="unit_whatsapp" class="form-label">WhatsApp</label>
+        <div class="input-group">
+            <input type="tel" class="form-control<?= isset($errors['whatsapp']) ? ' is-invalid' : '' ?>" id="unit_whatsapp" name="whatsapp" value="<?= htmlspecialchars($formatPhone($old['whatsapp'] ?? ($unit['whatsapp'] ?? ''))) ?>" placeholder="(17) 99100-0000" data-whatsapp-input data-whatsapp-target="#unitWhatsappLink">
+            <a id="unitWhatsappLink" class="btn btn-outline-success disabled" href="#" target="_blank" rel="noopener" data-whatsapp-launcher aria-disabled="true">
+                Abrir conversa
+            </a>
+        </div>
+        <?php if (isset($errors['whatsapp'])): ?><div class="invalid-feedback d-block"><?= htmlspecialchars($errors['whatsapp']) ?></div><?php endif; ?>
+        <div class="form-text">Clique em "Abrir conversa" para acessar o WhatsApp Web com este número.</div>
+    </div>
+    <div class="col-md-3">
+        <label for="unit_email" class="form-label">E-mail institucional</label>
+        <input type="email" class="form-control<?= isset($errors['email']) ? ' is-invalid' : '' ?>" id="unit_email" name="email" value="<?= htmlspecialchars($old['email'] ?? ($unit['email'] ?? '')) ?>" placeholder="unidade@educacao.riopreto.br">
+        <?php if (isset($errors['email'])): ?><div class="invalid-feedback d-block"><?= htmlspecialchars($errors['email']) ?></div><?php endif; ?>
     </div>
     <div class="col-md-3">
         <label for="unit_latitude" class="form-label">Latitude</label>

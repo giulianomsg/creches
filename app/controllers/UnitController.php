@@ -196,6 +196,10 @@ class UnitController extends BaseController
             'latitude' => trim((string) ($_POST['latitude'] ?? '')),
             'longitude' => trim((string) ($_POST['longitude'] ?? '')),
             'capacidade' => trim((string) ($_POST['capacidade'] ?? '')),
+            'telefone_fixo' => trim((string) ($_POST['telefone_fixo'] ?? '')),
+            'telefone_celular' => trim((string) ($_POST['telefone_celular'] ?? '')),
+            'whatsapp' => trim((string) ($_POST['whatsapp'] ?? '')),
+            'email' => trim((string) ($_POST['email'] ?? '')),
         ];
     }
 
@@ -212,6 +216,12 @@ class UnitController extends BaseController
         ]);
 
         $old = $input;
+
+        foreach (['telefone_fixo', 'telefone_celular', 'whatsapp', 'email'] as $optionalField) {
+            if (!array_key_exists($optionalField, $old)) {
+                $old[$optionalField] = '';
+            }
+        }
 
         $capacidade = filter_var($input['capacidade'], FILTER_VALIDATE_INT);
         if ($capacidade === false || $capacidade < 0) {
@@ -256,6 +266,46 @@ class UnitController extends BaseController
             $old['numero'] = $normalizedNumero;
         }
 
+        $telefoneLabels = [
+            'telefone_fixo' => 'Telefone fixo',
+            'telefone_celular' => 'Telefone celular',
+            'whatsapp' => 'WhatsApp',
+        ];
+
+        foreach ($telefoneLabels as $field => $label) {
+            $value = trim((string) ($input[$field] ?? ''));
+            if ($value === '') {
+                $input[$field] = null;
+                $old[$field] = '';
+                continue;
+            }
+
+            $digits = preg_replace('/\D/', '', $value);
+            if (strncmp($digits, '55', 2) === 0 && strlen($digits) > 11) {
+                $digits = substr($digits, 2);
+            }
+
+            if (strlen($digits) < 10 || strlen($digits) > 11) {
+                $errors[$field] = $label . ' deve conter DDD e número válido.';
+                $old[$field] = $value;
+                continue;
+            }
+
+            $input[$field] = $digits;
+            $old[$field] = $digits;
+        }
+
+        $email = trim((string) ($input['email'] ?? ''));
+        if ($email === '') {
+            $input['email'] = null;
+            $old['email'] = '';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Informe um e-mail válido.';
+        } else {
+            $input['email'] = $email;
+            $old['email'] = $email;
+        }
+
         $data = [
             'name' => $input['name'],
             'endereco' => $input['endereco'],
@@ -266,6 +316,10 @@ class UnitController extends BaseController
             'latitude' => $input['latitude'] !== '' ? $input['latitude'] : null,
             'longitude' => $input['longitude'] !== '' ? $input['longitude'] : null,
             'capacidade' => $capacidade !== false ? (int) $capacidade : null,
+            'telefone_fixo' => $input['telefone_fixo'] ?? null,
+            'telefone_celular' => $input['telefone_celular'] ?? null,
+            'whatsapp' => $input['whatsapp'] ?? null,
+            'email' => $input['email'] ?? null,
         ];
 
         return [$errors, $data, $old];
