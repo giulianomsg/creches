@@ -37,3 +37,7 @@ body {
     background: linear-gradient(90deg, #0d6efd 0%, #ffc107 50%, #dc3545 100%);
     margin-top: 0.35rem;
 }
+
+.toast-container {
+    z-index: 1080;
+}

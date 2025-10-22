@@ -1,4 +1,111 @@
 $(document).ready(function () {
+    const toastContainer = document.getElementById('toastContainer');
+    const ToastConstructor = window.bootstrap ? window.bootstrap.Toast : null;
+
+    function resolveToastTone(type) {
+        switch ((type || '').toLowerCase()) {
+            case 'success':
+                return 'success';
+            case 'warning':
+                return 'warning';
+            case 'danger':
+            case 'error':
+                return 'danger';
+            case 'info':
+                return 'info';
+            default:
+                return 'primary';
+        }
+    }
+
+    function triggerToast(options) {
+        if (!toastContainer || !options || !options.message) {
+            return;
+        }
+
+        const tone = resolveToastTone(options.type);
+        let delay = Number.isFinite(options.delay) ? options.delay : 6000;
+        if (!Number.isFinite(options.delay)) {
+            if (tone === 'success') {
+                delay = 4000;
+            } else if (tone === 'danger') {
+                delay = 8000;
+            }
+        }
+
+        const toastEl = document.createElement('div');
+        toastEl.className = 'toast align-items-center text-bg-' + tone + ' border-0 shadow';
+        toastEl.setAttribute('role', 'alert');
+        toastEl.setAttribute('aria-live', 'assertive');
+        toastEl.setAttribute('aria-atomic', 'true');
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'd-flex';
+
+        const body = document.createElement('div');
+        body.className = 'toast-body';
+        if (options.title) {
+            const strong = document.createElement('strong');
+            strong.className = 'me-2';
+            strong.textContent = options.title;
+            body.appendChild(strong);
+        }
+        body.appendChild(document.createTextNode(options.message));
+
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'btn-close btn-close-white me-2 m-auto';
+        closeBtn.setAttribute('data-bs-dismiss', 'toast');
+        closeBtn.setAttribute('aria-label', 'Fechar');
+
+        wrapper.appendChild(body);
+        wrapper.appendChild(closeBtn);
+        toastEl.appendChild(wrapper);
+        toastContainer.appendChild(toastEl);
+
+        if (ToastConstructor) {
+            const toastInstance = new ToastConstructor(toastEl, { delay: delay, autohide: true });
+            toastEl.addEventListener('hidden.bs.toast', function () {
+                toastInstance.dispose();
+                toastEl.remove();
+            });
+            toastInstance.show();
+        } else {
+            // Fallback simples caso o Bootstrap Toast não esteja disponível
+            setTimeout(function () {
+                toastEl.remove();
+            }, delay);
+        }
+    }
+
+    window.AppToast = window.AppToast || {};
+    window.AppToast.show = function (message, type, extraOptions) {
+        if (typeof message === 'object' && message !== null && !Array.isArray(message)) {
+            triggerToast(message);
+            return;
+        }
+
+        const options = Object.assign({}, extraOptions || {}, {
+            message: message,
+            type: type
+        });
+        triggerToast(options);
+    };
+
+    (Array.isArray(window.__appFlashes) ? window.__appFlashes : []).forEach(function (flash) {
+        if (!flash || !flash.message) {
+            return;
+        }
+        triggerToast({
+            message: flash.message,
+            type: flash.type || 'info'
+        });
+    });
+
+    (Array.isArray(window.__appDeferredToasts) ? window.__appDeferredToasts : []).forEach(function (toast) {
+        triggerToast(toast);
+    });
+
     if ($('#tableAlunos').length) {
         new DataTable('#tableAlunos', {
             language: {
@@ -49,6 +156,38 @@ $(document).ready(function () {
             }
         });
     }
+
+    function setupFormValidation() {
+        document.querySelectorAll('form.needs-validation').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const firstInvalid = form.querySelector(':invalid');
+                    let message = 'Revise os campos destacados antes de continuar.';
+                    if (firstInvalid) {
+                        message = firstInvalid.getAttribute('data-validation-message') || firstInvalid.validationMessage || message;
+                        try {
+                            firstInvalid.focus();
+                        } catch (error) {
+                            // ignora foco indisponível
+                        }
+                    }
+
+                    if (window.AppToast && typeof window.AppToast.show === 'function') {
+                        window.AppToast.show({
+                            type: 'warning',
+                            message: message
+                        });
+                    }
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }
+
+    setupFormValidation();
 
     $('#addIrmaoLista').on('click', function () {
         $('#listaIrmaos').append(`
@@ -255,38 +394,82 @@ $(document).ready(function () {
                         .filter(function (input) { return input; });
 
                     let lastQuery = '';
-                    const updateFromAddress = debounce(function () {
-                        const parts = addressInputs
+                    let pendingQuery = '';
+
+                    const geocodeFromAddress = function (options) {
+                        const opts = options || {};
+                        const manual = Boolean(opts.manual);
+                        const values = addressInputs
                             .map(function (input) { return input.value.trim(); })
                             .filter(function (value) { return value.length > 0; });
 
-                        if (parts.length < 2) {
+                        if (values.length < 2) {
+                            if (manual && window.AppToast && typeof window.AppToast.show === 'function') {
+                                window.AppToast.show({
+                                    type: 'warning',
+                                    message: 'Informe endereço e número para buscar as coordenadas.'
+                                });
+                            }
                             return;
                         }
 
-                        const query = parts.join(', ') + (context ? ', ' + context : '');
-                        if (query === lastQuery) {
+                        const query = values.join(', ') + (context ? ', ' + context : '');
+                        if (!manual && (query === lastQuery || query === pendingQuery)) {
                             return;
                         }
-                        lastQuery = query;
+                        if (manual && query === pendingQuery) {
+                            return;
+                        }
+
+                        pendingQuery = query;
 
                         fetch('https://geocode.maps.co/search?q=' + encodeURIComponent(query))
                             .then(function (response) { return response.ok ? response.json() : null; })
                             .then(function (data) {
+                                pendingQuery = '';
                                 if (!data || !data.length) {
+                                    if (manual && window.AppToast && typeof window.AppToast.show === 'function') {
+                                        window.AppToast.show({
+                                            type: 'danger',
+                                            message: 'Não foi possível localizar coordenadas para o endereço informado.'
+                                        });
+                                    }
                                     return;
                                 }
                                 const point = data[0];
                                 const resultLat = parseFloat(point.lat);
                                 const resultLng = parseFloat(point.lon);
                                 if (Number.isNaN(resultLat) || Number.isNaN(resultLng)) {
+                                    if (manual && window.AppToast && typeof window.AppToast.show === 'function') {
+                                        window.AppToast.show({
+                                            type: 'danger',
+                                            message: 'O serviço de geolocalização retornou coordenadas inválidas.'
+                                        });
+                                    }
                                     return;
                                 }
+                                lastQuery = query;
                                 setMarker(resultLat, resultLng, true);
+                                if (manual && window.AppToast && typeof window.AppToast.show === 'function') {
+                                    window.AppToast.show({
+                                        type: 'success',
+                                        message: 'Coordenadas atualizadas a partir do endereço informado.'
+                                    });
+                                }
                             })
                             .catch(function () {
-                                // ignora falhas de geocodificação
+                                pendingQuery = '';
+                                if (manual && window.AppToast && typeof window.AppToast.show === 'function') {
+                                    window.AppToast.show({
+                                        type: 'danger',
+                                        message: 'Erro ao consultar o serviço de geolocalização. Tente novamente.'
+                                    });
+                                }
                             });
+                    };
+
+                    const updateFromAddress = debounce(function () {
+                        geocodeFromAddress({ manual: false });
                     }, 800);
 
                     addressInputs.forEach(function (input) {
@@ -294,6 +477,16 @@ $(document).ready(function () {
                             input.addEventListener(evt, updateFromAddress);
                         });
                     });
+
+                    const geocodeButtonSelector = container.getAttribute('data-geocode-button');
+                    if (geocodeButtonSelector) {
+                        const geocodeButton = document.querySelector(geocodeButtonSelector);
+                        if (geocodeButton) {
+                            geocodeButton.addEventListener('click', function () {
+                                geocodeFromAddress({ manual: true });
+                            });
+                        }
+                    }
                 }
             }
 

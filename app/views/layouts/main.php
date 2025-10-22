@@ -1,5 +1,8 @@
 <?php use App\Helpers\CSRFHelper; use App\Helpers\FlashHelper; ?>
-<?php $baseUrl = rtrim($config['base_url'], '/'); ?>
+<?php
+$baseUrl = rtrim($config['base_url'], '/');
+$flashMessages = FlashHelper::get();
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -44,9 +47,12 @@
     </div>
 </nav>
 <main class="container my-4">
-    <?php foreach (FlashHelper::get() as $flash): ?>
-        <div class="alert alert-<?= htmlspecialchars($flash['type']) ?>"><?= htmlspecialchars($flash['message']) ?></div>
-    <?php endforeach; ?>
+    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" aria-live="polite" aria-atomic="true"></div>
+    <?php if (!empty($flashMessages)): ?>
+        <script>
+            window.__appFlashes = <?= json_encode($flashMessages, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+        </script>
+    <?php endif; ?>
     <?php include $content; ?>
 </main>
 <footer class="bg-light text-center py-3">

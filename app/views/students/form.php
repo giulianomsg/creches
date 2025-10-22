@@ -8,6 +8,15 @@
     unset($_SESSION['form_old'], $_SESSION['form_errors']);
 ?>
 <h1 class="h3 mb-3"><?= $isEdit ? 'Editar Cadastro' : 'Novo Cadastro' ?></h1>
+<?php if (!empty($errors)): ?>
+    <script>
+        window.__appDeferredToasts = window.__appDeferredToasts || [];
+        window.__appDeferredToasts.push({
+            type: 'danger',
+            message: 'Não foi possível salvar o cadastro. Revise os campos destacados e tente novamente.'
+        });
+    </script>
+<?php endif; ?>
 <form action="<?= htmlspecialchars($action) ?>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
     <input type="hidden" name="<?= $config['security']['csrf_token_name'] ?>" value="<?= $token ?>">
     <?php if ($isEdit): ?>
@@ -18,15 +27,15 @@
         <div class="card-body row g-3">
             <div class="col-md-6">
                 <label class="form-label">Nome do Aluno *</label>
-                <input type="text" name="nome" class="form-control" value="<?= htmlspecialchars($old['nome'] ?? $student['nome'] ?? '') ?>" required>
+                <input type="text" name="nome" class="form-control" value="<?= htmlspecialchars($old['nome'] ?? $student['nome'] ?? '') ?>" required data-validation-message="Informe o nome completo da criança.">
             </div>
             <div class="col-md-3">
                 <label class="form-label">Data de Nascimento *</label>
-                <input type="date" name="data_nascimento" class="form-control" value="<?= htmlspecialchars($old['data_nascimento'] ?? $student['data_nascimento'] ?? '') ?>" required>
+                <input type="date" name="data_nascimento" class="form-control" value="<?= htmlspecialchars($old['data_nascimento'] ?? $student['data_nascimento'] ?? '') ?>" required data-validation-message="Informe a data de nascimento da criança.">
             </div>
             <div class="col-md-3">
                 <label class="form-label">Sexo *</label>
-                <select name="sexo" class="form-select" required>
+                <select name="sexo" class="form-select" required data-validation-message="Selecione o sexo da criança.">
                     <?php $sexoSel = $old['sexo'] ?? $student['sexo'] ?? ''; ?>
                     <option value="">Selecione</option>
                     <?php foreach (['Masculino','Feminino','Outro'] as $opt): ?>
@@ -36,7 +45,7 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label">Nome da Mãe *</label>
-                <input type="text" name="nome_mae" class="form-control" value="<?= htmlspecialchars($old['nome_mae'] ?? $student['nome_mae'] ?? '') ?>" required>
+                <input type="text" name="nome_mae" class="form-control" value="<?= htmlspecialchars($old['nome_mae'] ?? $student['nome_mae'] ?? '') ?>" required data-validation-message="Informe o nome completo da mãe ou responsável.">
             </div>
             <div class="col-md-6">
                 <label class="form-label">Nome do Pai</label>
@@ -53,12 +62,12 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label">Telefone / WhatsApp *</label>
-                <input type="tel" name="telefone" class="form-control" value="<?= htmlspecialchars($old['telefone'] ?? $student['telefone'] ?? '') ?>" required>
+                <input type="tel" name="telefone" class="form-control" value="<?= htmlspecialchars($old['telefone'] ?? $student['telefone'] ?? '') ?>" required data-validation-message="Informe um telefone válido para contato.">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Requerente *</label>
                 <?php $reqSel = $old['requerente'] ?? $student['requerente'] ?? ''; ?>
-                <select name="requerente" class="form-select" required>
+                <select name="requerente" class="form-select" required data-validation-message="Informe quem está realizando o cadastro.">
                     <option value="">Selecione</option>
                     <?php foreach (['PAI','MÃE','RESPONSÁVEL LEGAL','AVÓS'] as $opt): ?>
                         <option value="<?= $opt ?>" <?= $reqSel === $opt ? 'selected' : '' ?>><?= $opt ?></option>
@@ -88,15 +97,15 @@
         <div class="card-body row g-3">
             <div class="col-md-3">
                 <label class="form-label">CEP *</label>
-                <input type="text" name="cep" id="cep" class="form-control" value="<?= htmlspecialchars($old['cep'] ?? $student['cep'] ?? '') ?>" data-cep-autocomplete data-cep-logradouro="#endereco" data-cep-bairro="#bairro" required>
+                <input type="text" name="cep" id="cep" class="form-control" value="<?= htmlspecialchars($old['cep'] ?? $student['cep'] ?? '') ?>" data-cep-autocomplete data-cep-logradouro="#endereco" data-cep-bairro="#bairro" required data-validation-message="Informe o CEP da residência.">
             </div>
             <div class="col-md-5">
                 <label class="form-label">Endereço *</label>
-                <input type="text" name="endereco" id="endereco" class="form-control" value="<?= htmlspecialchars($old['endereco'] ?? $student['endereco'] ?? '') ?>" required>
+                <input type="text" name="endereco" id="endereco" class="form-control" value="<?= htmlspecialchars($old['endereco'] ?? $student['endereco'] ?? '') ?>" required data-validation-message="Informe o logradouro da residência.">
             </div>
             <div class="col-md-2">
                 <label class="form-label">Número *</label>
-                <input type="text" name="numero" id="numero" class="form-control" value="<?= htmlspecialchars($old['numero'] ?? $student['numero'] ?? '') ?>" required>
+                <input type="text" name="numero" id="numero" class="form-control" value="<?= htmlspecialchars($old['numero'] ?? $student['numero'] ?? '') ?>" required data-validation-message="Informe o número do endereço.">
             </div>
             <div class="col-md-2">
                 <label class="form-label">Complemento</label>
@@ -104,7 +113,7 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label">Bairro *</label>
-                <input type="text" name="bairro" id="bairro" class="form-control" value="<?= htmlspecialchars($old['bairro'] ?? $student['bairro'] ?? '') ?>" required>
+                <input type="text" name="bairro" id="bairro" class="form-control" value="<?= htmlspecialchars($old['bairro'] ?? $student['bairro'] ?? '') ?>" required data-validation-message="Informe o bairro de residência.">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Latitude</label>
@@ -116,8 +125,11 @@
             </div>
             <div class="col-12">
                 <label class="form-label">Localização aproximada</label>
-                <div id="studentLocationMap" class="coordinate-map border rounded" data-lat-input="#student_latitude" data-lng-input="#student_longitude" data-address-fields="#endereco,#numero,#bairro,#cep" data-geocode-context="São José do Rio Preto - SP"></div>
+                <div id="studentLocationMap" class="coordinate-map border rounded" data-lat-input="#student_latitude" data-lng-input="#student_longitude" data-address-fields="#endereco,#numero,#bairro,#cep" data-geocode-context="São José do Rio Preto - SP" data-geocode-button="#studentGeocodeButton"></div>
                 <div class="form-text">Arraste o marcador para ajustar a posição ou preencha o endereço para localizar automaticamente.</div>
+            </div>
+            <div class="col-12 d-flex justify-content-end">
+                <button type="button" class="btn btn-outline-primary" id="studentGeocodeButton">Buscar localização pelo endereço</button>
             </div>
             <div class="col-12">
                 <label class="form-label">Comprovante de Residência</label>
