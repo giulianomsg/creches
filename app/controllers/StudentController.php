@@ -115,11 +115,9 @@ class StudentController extends BaseController
         $documents = $this->handleUploads($studentId);
         $this->documents->saveMany($studentId, $documents);
 
-        $this->studentUnits->savePreferences($studentId, $_POST['unidades'] ?? []);
-        $this->waitingSiblings->saveList($studentId, $_POST['irmaos_lista'] ?? []);
-        $enrolled = $_POST['irmaos_matriculados'] ?? [];
-        $formatted = array_map(fn($nome, $escola) => ['nome' => $nome, 'escola' => $escola], $enrolled['nome'] ?? [], $enrolled['escola'] ?? []);
-        $this->enrolledSiblings->saveList($studentId, $formatted);
+        $this->studentUnits->savePreferences($studentId, $this->prepareUnitPreferences($_POST['unidades'] ?? []));
+        $this->waitingSiblings->saveList($studentId, $this->prepareWaitingSiblings($_POST['irmaos_lista'] ?? []));
+        $this->enrolledSiblings->saveList($studentId, $this->prepareEnrolledSiblings($_POST['irmaos_matriculados'] ?? []));
 
         $this->logActivity('create', 'Cadastro de aluno #' . $studentId, (int) $user['id']);
 
@@ -174,11 +172,9 @@ class StudentController extends BaseController
         $documents = $this->handleUploads($id);
         $this->documents->saveMany($id, $documents);
 
-        $this->studentUnits->savePreferences($id, $_POST['unidades'] ?? []);
-        $this->waitingSiblings->saveList($id, $_POST['irmaos_lista'] ?? []);
-        $enrolled = $_POST['irmaos_matriculados'] ?? [];
-        $formatted = array_map(fn($nome, $escola) => ['nome' => $nome, 'escola' => $escola], $enrolled['nome'] ?? [], $enrolled['escola'] ?? []);
-        $this->enrolledSiblings->saveList($id, $formatted);
+        $this->studentUnits->savePreferences($id, $this->prepareUnitPreferences($_POST['unidades'] ?? []));
+        $this->waitingSiblings->saveList($id, $this->prepareWaitingSiblings($_POST['irmaos_lista'] ?? []));
+        $this->enrolledSiblings->saveList($id, $this->prepareEnrolledSiblings($_POST['irmaos_matriculados'] ?? []));
 
         $this->logActivity('update', 'Atualização do aluno #' . $id, (int) $user['id']);
 
@@ -346,5 +342,60 @@ class StudentController extends BaseController
         }
 
         return $saved;
+    }
+
+    private function prepareUnitPreferences($preferences): array
+    {
+        if (!is_array($preferences)) {
+            return [];
+        }
+
+        return $preferences;
+    }
+
+    private function prepareWaitingSiblings($siblings): array
+    {
+        if (is_array($siblings)) {
+            return $siblings;
+        }
+
+        $value = trim((string) $siblings);
+        return $value === '' ? [] : [$value];
+    }
+
+    private function prepareEnrolledSiblings($siblings): array
+    {
+        if (!is_array($siblings)) {
+            return [];
+        }
+
+        $names = $siblings['nome'] ?? [];
+        $schools = $siblings['escola'] ?? [];
+
+        if (!is_array($names)) {
+            $names = [];
+        }
+
+        if (!is_array($schools)) {
+            $schools = [];
+        }
+
+        $formatted = [];
+
+        foreach ($names as $index => $name) {
+            $nome = trim((string) $name);
+            $escola = trim((string)($schools[$index] ?? ''));
+
+            if ($nome === '' && $escola === '') {
+                continue;
+            }
+
+            $formatted[] = [
+                'nome' => $nome,
+                'escola' => $escola,
+            ];
+        }
+
+        return $formatted;
     }
 }
