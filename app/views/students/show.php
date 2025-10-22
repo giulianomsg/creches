@@ -1,4 +1,13 @@
-<?php $baseUrl = rtrim($config['base_url'], '/'); ?>
+<?php
+$baseUrl = rtrim($config['base_url'], '/');
+$cpfAluno = $student['cpf_aluno'] ?? '';
+if ($cpfAluno) {
+    $digits = preg_replace('/[^0-9]/', '', $cpfAluno);
+    if (strlen($digits) === 11) {
+        $cpfAluno = substr($digits, 0, 3) . '.' . substr($digits, 3, 3) . '.' . substr($digits, 6, 3) . '-' . substr($digits, 9);
+    }
+}
+?>
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h3">Ficha do Aluno</h1>
     <div>
@@ -14,6 +23,8 @@
         <div class="col-md-4"><strong>Sexo:</strong> <?= htmlspecialchars($student['sexo']) ?></div>
         <div class="col-md-4"><strong>Mãe:</strong> <?= htmlspecialchars($student['nome_mae']) ?></div>
         <div class="col-md-4"><strong>Pai:</strong> <?= htmlspecialchars($student['nome_pai']) ?></div>
+        <div class="col-md-4"><strong>CPF do Aluno:</strong> <?= htmlspecialchars($cpfAluno) ?></div>
+        <div class="col-md-4"><strong>E-mail de Contato:</strong> <?= htmlspecialchars($student['email_contato'] ?? '') ?></div>
         <div class="col-md-4"><strong>Telefone:</strong> <?= htmlspecialchars($student['telefone']) ?></div>
         <div class="col-md-4"><strong>Requerente:</strong> <?= htmlspecialchars($student['requerente']) ?></div>
         <div class="col-md-4"><strong>Status:</strong> <?= htmlspecialchars($student['status']) ?></div>

@@ -503,4 +503,38 @@ $(document).ready(function () {
     }
 
     setupWhatsappLaunchers();
+
+    function formatCpfValue(value) {
+        if (!value) {
+            return '';
+        }
+        var digits = value.toString().replace(/\D/g, '').slice(0, 11);
+        if (digits.length <= 3) {
+            return digits;
+        }
+        if (digits.length <= 6) {
+            return digits.substring(0, 3) + '.' + digits.substring(3);
+        }
+        if (digits.length <= 9) {
+            return digits.substring(0, 3) + '.' + digits.substring(3, 6) + '.' + digits.substring(6);
+        }
+        return digits.substring(0, 3) + '.' + digits.substring(3, 6) + '.' + digits.substring(6, 9) + '-' + digits.substring(9);
+    }
+
+    function setupCpfMasks() {
+        document.querySelectorAll('[data-mask-cpf]').forEach(function (input) {
+            var applyMask = function () {
+                var formatted = formatCpfValue(input.value);
+                if (input.value !== formatted) {
+                    input.value = formatted;
+                }
+            };
+
+            input.addEventListener('input', applyMask);
+            input.addEventListener('blur', applyMask);
+            applyMask();
+        });
+    }
+
+    setupCpfMasks();
 });

@@ -43,6 +43,15 @@
                 <input type="text" name="nome_pai" class="form-control" value="<?= htmlspecialchars($old['nome_pai'] ?? $student['nome_pai'] ?? '') ?>">
             </div>
             <div class="col-md-4">
+                <label class="form-label">CPF do Aluno</label>
+                <input type="text" name="cpf_aluno" class="form-control" maxlength="14" inputmode="numeric" data-mask-cpf pattern="^([0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2}|[0-9]{11})$" value="<?= htmlspecialchars($old['cpf_aluno'] ?? $student['cpf_aluno'] ?? '') ?>">
+                <div class="form-text">Informe apenas números ou utilize a formatação padrão.</div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">E-mail de Contato</label>
+                <input type="email" name="email_contato" class="form-control" value="<?= htmlspecialchars($old['email_contato'] ?? $student['email_contato'] ?? '') ?>">
+            </div>
+            <div class="col-md-4">
                 <label class="form-label">Telefone / WhatsApp *</label>
                 <input type="tel" name="telefone" class="form-control" value="<?= htmlspecialchars($old['telefone'] ?? $student['telefone'] ?? '') ?>" required>
             </div>

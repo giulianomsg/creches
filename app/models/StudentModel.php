@@ -18,7 +18,7 @@ class StudentModel extends BaseModel
         }
 
         if (!empty($filters['search'])) {
-            $conditions[] = '(s.nome LIKE :search OR s.nis LIKE :search OR s.cpf_pai LIKE :search OR s.cpf_mae LIKE :search)';
+            $conditions[] = '(s.nome LIKE :search OR s.nis LIKE :search OR s.cpf_aluno LIKE :search OR s.email_contato LIKE :search)';
             $params['search'] = '%' . $filters['search'] . '%';
         }
 
@@ -51,14 +51,14 @@ class StudentModel extends BaseModel
             mae_trabalha, mae_adolescente, sob_guarda_avo, pais_deficientes,
             filho_servidor, servidor_municipal, bolsa_familia, nis,
             alta_vulnerabilidade, media_vulnerabilidade, endereco, numero,
-            complemento, bairro, cep, latitude, longitude, status, created_by
+            complemento, bairro, cep, latitude, longitude, cpf_aluno, email_contato, status, created_by
         ) VALUES (
             :nome, :data_nascimento, :sexo, :nome_mae, :nome_pai, :telefone, :requerente,
             :possui_gemeo, :nome_gemeo, :possui_irmao_lista, :necessidades_especiais,
             :mae_trabalha, :mae_adolescente, :sob_guarda_avo, :pais_deficientes,
             :filho_servidor, :servidor_municipal, :bolsa_familia, :nis,
             :alta_vulnerabilidade, :media_vulnerabilidade, :endereco, :numero,
-            :complemento, :bairro, :cep, :latitude, :longitude, :status, :created_by
+            :complemento, :bairro, :cep, :latitude, :longitude, :cpf_aluno, :email_contato, :status, :created_by
         )');
 
         $stmt->execute($data);
@@ -98,6 +98,8 @@ class StudentModel extends BaseModel
             cep = :cep,
             latitude = :latitude,
             longitude = :longitude,
+            cpf_aluno = :cpf_aluno,
+            email_contato = :email_contato,
             status = :status
         WHERE id = :id');
 

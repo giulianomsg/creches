@@ -240,12 +240,17 @@ class StudentController extends BaseController
 
     private function sanitizeStudentData(array $data, int $userId): array
     {
+        $cpf = preg_replace('/[^0-9]/', '', $data['cpf_aluno'] ?? '');
+        $email = trim($data['email_contato'] ?? '');
+
         return [
             'nome' => trim($data['nome'] ?? ''),
             'data_nascimento' => $data['data_nascimento'] ?? null,
             'sexo' => $data['sexo'] ?? null,
             'nome_mae' => trim($data['nome_mae'] ?? ''),
             'nome_pai' => trim($data['nome_pai'] ?? ''),
+            'cpf_aluno' => $cpf !== '' ? $cpf : null,
+            'email_contato' => $email !== '' ? $email : null,
             'telefone' => trim($data['telefone'] ?? ''),
             'requerente' => $data['requerente'] ?? null,
             'possui_gemeo' => isset($data['possui_gemeo']) ? 1 : 0,
@@ -286,6 +291,14 @@ class StudentController extends BaseController
             'bairro' => 'Bairro é obrigatório.',
             'cep' => 'CEP é obrigatório.',
         ]);
+
+        if (!empty($data['cpf_aluno']) && !ValidationHelper::cpf($data['cpf_aluno'])) {
+            $errors['cpf_aluno'] = 'CPF do aluno inválido.';
+        }
+
+        if (!empty($data['email_contato']) && !ValidationHelper::email($data['email_contato'])) {
+            $errors['email_contato'] = 'E-mail de contato inválido.';
+        }
 
         if (!ValidationHelper::date($data['data_nascimento'])) {
             $errors['data_nascimento'] = 'Data de nascimento inválida.';
