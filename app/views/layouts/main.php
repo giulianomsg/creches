@@ -1,0 +1,69 @@
+<?php use App\Helpers\CSRFHelper; use App\Helpers\FlashHelper; ?>
+<?php
+$baseUrl = rtrim($config['base_url'], '/');
+$flashMessages = FlashHelper::get();
+?>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?= htmlspecialchars($config['app_name']) ?></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.7/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="<?= htmlspecialchars($baseUrl . '/assets/css/main.css') ?>">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="<?= htmlspecialchars($baseUrl . '/') ?>"><?= htmlspecialchars($config['app_name']) ?></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="<?= htmlspecialchars($baseUrl . '/?route=students') ?>">Cadastros</a></li>
+                <li class="nav-item"><a class="nav-link" href="<?= htmlspecialchars($baseUrl . '/?route=reports') ?>">Relatórios</a></li>
+                <?php if (!empty($user) && $user['role'] === 'admin'): ?>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Configurações</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="<?= htmlspecialchars($baseUrl . '/?route=config/units') ?>">Unidades</a></li>
+                            <li><a class="dropdown-item" href="<?= htmlspecialchars($baseUrl . '/?route=config/users') ?>">Usuários</a></li>
+                            <li><a class="dropdown-item" href="<?= htmlspecialchars($baseUrl . '/?route=config/priority') ?>">Pontuação</a></li>
+                            <li><a class="dropdown-item" href="<?= htmlspecialchars($baseUrl . '/?route=logs') ?>">Logs</a></li>
+                        </ul>
+                    </li>
+                <?php endif; ?>
+            </ul>
+            <div class="d-flex align-items-center text-white">
+                <?php if (!empty($user)): ?>
+                    <span class="me-3">Olá, <?= htmlspecialchars($user['name']) ?></span>
+                    <a href="<?= htmlspecialchars($baseUrl . '/?route=logout') ?>" class="btn btn-outline-light btn-sm">Sair</a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</nav>
+<main class="container my-4">
+    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" aria-live="polite" aria-atomic="true"></div>
+    <?php if (!empty($flashMessages)): ?>
+        <script>
+            window.__appFlashes = <?= json_encode($flashMessages, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+        </script>
+    <?php endif; ?>
+    <?php include $content; ?>
+</main>
+<footer class="bg-light text-center py-3">
+    <small>Secretaria Municipal de Educação de São José do Rio Preto - Sistema desenvolvido conforme LDB, ECA e legislação municipal.</small>
+</footer>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.7/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="<?= htmlspecialchars($baseUrl . '/assets/js/app.js') ?>"></script>
+</body>
+</html>

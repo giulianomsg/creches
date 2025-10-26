@@ -1,0 +1,7 @@
+/vendor/
+config/config.local.php
+.env
+app/uploads/*
+!app/uploads/.gitignore
+app/logs/*
+!app/logs/.gitignore
